@@ -2,57 +2,65 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <!-- Для ПК viewport оставляем стандартным -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Я люблю тебя (PC Only)</title>
-  
+  <title>Я люблю тебя</title>
   <style>
     :root {
-      /* Спокойные, но глубокие цвета, которые круто смотрятся на больших мониторах */
-      --bg-gradient-1: #c0392b;
-      --bg-gradient-2: #8e44ad;
-      --heart-color: #ffffff; 
-      --text-color: #ffffff;
+      --bg-gradient-1: #ff9a9e;
+      --bg-gradient-2: #fad0c4;
+      
+      /* Цвет сердечек */
+      --heart-color: #FF247C; 
+      
+      /* Цвета для кнопки */
+      --btn-gradient-start: #E94560;
+      --btn-gradient-end: #C7183B;
+      --btn-border: rgba(255, 255, 255, 0.7);
+      --btn-hover-glow: rgba(233, 69, 96, 0.5);
+
+      --text-color: #E94560;
+      --text-light: #FF8E9B;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      min-height: 100vh; 
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      /* Градиент теперь спокойный, без лишних переходов */
-      background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
+      background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
       font-family: 'Arial', sans-serif;
-      overflow: hidden; /* Чтобы не было полос прокрутки от летящих сердец */
+      overflow: hidden;
       position: relative;
       margin: 0;
     }
 
-    /* Контейнер сердец на весь экран */
+    /* --- СЕРДЕЧКИ --- */
     .heart-container {
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none; /* Чтобы клики проходили сквозь сердца */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
       z-index: 1;
     }
 
     .heart {
       position: absolute;
-      width: 40px; /* Крупные сердца для ПК */
-      height: 40px;
       background-color: var(--heart-color);
-      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
-      opacity: 0;
-      transform: scale(0);
-      will-change: transform, opacity, top, left;
-      pointer-events: none;
+      width: 30px;
+      height: 30px;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+      animation: float-path 8s linear infinite;
+      opacity: 0.9;
+      will-change: transform, opacity;
     }
 
-    /* Форма сердца через псевдоэлементы */
-    .heart::before, .heart::after {
+    .heart::before,
+    .heart::after {
       content: "";
       background-color: inherit;
       border-radius: 50%;
@@ -64,227 +72,213 @@
     .heart::before { top: -50%; left: 0; }
     .heart::after { top: 0; right: -50%; }
 
-    /* Анимация специально для широкого экрана: взлет снизу вверх */
-    @keyframes pc-rise {
-      0% { 
-        opacity: 0; 
-        transform: translate(0, 60px) scale(0) rotate(0deg); 
-        animation-timing-function: cubic-bezier(0.17, 0.68, 0.84, 1.41);
-      }
-      10% { 
-        opacity: 1; 
-        /* Резкий старт вверх и в стороны */
-        transform: translate(-50px, -250px) scale(1.1) rotate(-20deg); 
-      }
-      50% { 
-        /* Парят в центре экрана */
-        transform: translate(30px, -150px) scale(1) rotate(10deg);
-      }
-      100% { 
-        /* Улетают высоко и растворяются */
-        opacity: 0; 
-        transform: translate(100px, -400px) scale(0.5) rotate(45deg); 
-      }
+    @keyframes float-path {
+      0% { transform: translate(0, -50px) rotate(0deg); opacity: 0; animation-timing-function: ease-out; }
+      10% { opacity: 1; transform: translate(-10px, -100px) rotate(-45deg); }
+      50% { transform: translate(150px, 200px) rotate(45deg); animation-timing-function: ease-in-out; }
+      100% { transform: translate(300px, 150vh) rotate(180deg); opacity: 0; }
     }
 
-    /* Блок с текстом по центру */
-    .content-box {
+    /* --- ТЕКСТ --- */
+    .container {
       text-align: center;
       position: relative;
       z-index: 10;
-      padding: 20px;
+      width: 100%;
       max-width: 800px;
+      padding: 20px;
     }
 
     h1 {
       color: var(--text-color);
-      font-size: 6rem; /* Очень крупный шрифт для ПК */
-      text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      font-size: 4rem;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       line-height: 1.1;
       margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 1s ease forwards 0.5s;
       text-transform: uppercase;
-      letter-spacing: 5px;
-      opacity: 0; transform: translateY(40px);
-      animation: fadeInUp 1.2s ease forwards 0.4s;
+      letter-spacing: 3px;
     }
 
     p.subtitle {
-      color: rgba(255,255,255,0.9);
-      font-size: 1.8rem;
+      color: var(--text-light);
+      font-size: 1.2rem;
       margin-top: 10px;
-      opacity: 0; animation: fadeIn 1.5s ease forwards 1s;
-      word-wrap: break-word;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards 1s;
     }
 
     @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeIn { to { opacity: 1; } }
 
-    /* Панель управления внизу */
-    .controls-panel {
+    /* --- КНОПКА (ИДЕАЛЬНЫЙ ЦЕНТР) --- */
+    .controls-wrapper {
       position: fixed;
       bottom: 40px;
       left: 50%;
       transform: translateX(-50%);
+      z-index: 100;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 25px;
-      z-index: 20;
-      pointer-events: auto;
+      gap: 15px;
     }
 
-    .play-btn {
-      width: 90px; height: 90px; border-radius: 50%;
-      border: 3px solid rgba(255, 255, 255, 0.5);
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(5px);
-      color: white; font-size: 36px; cursor: pointer;
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.3s ease;
+    .control-btn {
+      width: 60px; /* Чуть компактнее для гармонии */
+      height: 60px;
+      border-radius: 50%;
+      border: 2px solid var(--btn-border);
+      
+      /* Градиент кнопки */
+      background: radial-gradient(circle at 30% 30%, rgba(233, 69, 96, 0.95), var(--btn-gradient-end));
+      
+      color: white;
+      font-size: 20px; /* Чуть меньше, чтобы не упирался в края */
+      cursor: pointer;
+      
+      /* Тень */
+      box-shadow: 0 6px 15px rgba(233, 69, 96, 0.35);
+      
+      /* ГЛАВНОЕ ДЛЯ ЦЕНТРОВКИ: */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      /* Эффект стекла */
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
-    .play-btn:hover { 
-      transform: scale(1.1); 
+
+    .control-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 25px var(--btn-hover-glow);
       border-color: white;
-      box-shadow: 0 0 45px rgba(255, 255, 255, 0.4);
     }
     
-    .volume-block {
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 15px; border-radius: 12px;
-      backdrop-filter: blur(5px);
+    .control-btn.paused { 
+      background-color: rgba(200, 200, 200, 0.9);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: #666;
+      box-shadow: none;
+      transform: none;
+    }
+    
+    .volume-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
     }
 
-    .vol-label {
+    .volume-label {
+      font-size: 10px;
+      text-transform: uppercase;
       color: rgba(255,255,255,0.8);
       font-weight: bold;
-      font-size: 14px;
-      text-transform: uppercase;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
 
     input[type=range] {
-      cursor: pointer; accent-color: white; width: 220px;
-      -webkit-appearance: none; background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px; height: 8px;
+      cursor: pointer;
+      accent-color: var(--heart-color);
+      width: 120px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 4px;
     }
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
-      background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); cursor: pointer; margin-top: -9px;
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2.5rem; }
+      .control-btn { width: 55px; height: 55px; font-size: 18px; }
+      input[type=range] { width: 100px; }
+      .heart { width: 20px; height: 20px; } 
     }
   </style>
 </head>
 <body>
 
-  <!-- Сердечки -->
+  <!-- Контейнер для сердечек -->
   <div class="heart-container" id="heartsArea"></div>
 
-  <!-- Текст -->
-  <div class="content-box">
+  <!-- Основной текст -->
+  <div class="container">
     <h1>Я люблю тебя</h1>
     <p class="subtitle">Ты — самое дорогое, что у меня есть</p>
   </div>
 
-  <!-- Музыка (ссылка на надежный бесплатный трек) -->
+  <!-- Аудиофайл -->
   <audio id="bgMusic" loop>
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Music-Genres-Sample-Pop.mp3" type="audio/mpeg">
+    <source src="ksb_song.mp3" type="audio/mpeg">
+    Ваш браузер не поддерживает аудио.
   </audio>
 
-  <!-- Кнопки -->
-  <div class="controls-panel">
-    <button id="playBtn" class="play-btn" title="Включить музыку">▶</button>
-    <div class="volume-block">
-      <span class="vol-label">Громкость</span>
-      <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5">
+  <!-- Блок управления -->
+  <div class="controls-wrapper">
+    <button id="playBtn" class="control-btn" title="Включить/Выключить музыку">▶</button>
+    <div class="volume-container">
+      <span class="volume-label">Громкость</span>
+      <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.3">
     </div>
   </div>
 
   <script>
+    // --- ГЕНЕРАТОР СЕРДЕЧЕК ---
     const heartsArea = document.getElementById('heartsArea');
-    const playBtn = document.getElementById('playBtn');
-    const bgMusic = document.getElementById('bgMusic');
-    const volumeSlider = document.getElementById('volumeSlider');
-    
-    let isPlaying = false;
-    const totalHearts = 120; // Много сердец для большого экрана
-    const hearts = [];
+    const totalHearts = 20; 
 
-    // Создаем сердца
     for (let i = 0; i < totalHearts; i++) {
       const heart = document.createElement('div');
       heart.classList.add('heart');
-      heartsArea.appendChild(heart);
-      hearts.push(heart);
-    }
-
-    function animateHeart(heart) {
-      if (!isPlaying) {
-        heart.style.opacity = '0';
-        heart.style.transform = 'scale(0)';
-        return;
-      }
-
-      // Случайная позиция по ширине экрана
+      
       const randomX = Math.random() * 100;
       heart.style.left = randomX + '%';
       
-      // Длительность полета (длиннее для эпичности на ПК)
-      const duration = Math.random() * 1 + 4.5; 
-      heart.style.animationDuration = duration + 's';
-      
-      // Задержка старта
-      const delay = Math.random() * duration;
+      const delay = Math.random() * 5; 
       heart.style.animationDelay = delay + 's';
       
-      heart.style.opacity = ''; 
-      heart.style.transform = '';
-      heart.style.animationName = 'pc-rise';
+      heartsArea.appendChild(heart);
     }
 
-    function startAnimation() {
-      hearts.forEach(heart => animateHeart(heart));
-      setTimeout(startAnimation, 4500); // Цикл перезапуска
-    }
-
-    function stopAnimation() {
-      hearts.forEach(heart => {
-        heart.style.opacity = '0';
-        heart.style.transform = 'scale(0)';
-      });
-    }
+    // --- МУЗЫКА И КНОПКИ ---
+    const playBtn = document.getElementById('playBtn');
+    const bgMusic = document.getElementById('bgMusic');
+    const volumeSlider = document.getElementById('volumeSlider');
+    let isPlaying = false;
 
     if (bgMusic) {
-      bgMusic.volume = volumeSlider.value;
-      
-      playBtn.addEventListener('click', () => {
-        if (!isPlaying) {
-          const playPromise = bgMusic.play();
-          
-          if (playPromise !== undefined) {
-            playPromise
-              .then(_ => {
-                isPlaying = true;
-                playBtn.textContent = '⏸';
-                console.log("Музыка запущена!");
-                startAnimation();
-              })
-              .catch(error => {
-                // Если браузер заблокировал звук, он выдаст ошибку здесь
-                console.error("Автовоспроизведение заблокировано браузером:", error);
-                alert("Браузер не разрешает автовоспроизведение. Пожалуйста, нажмите кнопку Play ещё раз.");
-              });
+        playBtn.addEventListener('click', () => {
+          if (!isPlaying) {
+            const playPromise = bgMusic.play();
+            
+            if (playPromise !== undefined) {
+              playPromise
+                .then(_ => {
+                  isPlaying = true;
+                  playBtn.textContent = '⏸';
+                  playBtn.classList.remove('paused');
+                })
+                .catch(error => {
+                  console.log('Автовоспроизведение заблокировано браузером.', error);
+                });
+            }
+          } else {
+            bgMusic.pause();
+            isPlaying = false;
+            playBtn.textContent = '▶';
+            playBtn.classList.add('paused');
           }
-        } else {
-          bgMusic.pause();
-          isPlaying = false;
-          playBtn.textContent = '▶';
-          stopAnimation();
-        }
-      });
+        });
 
-      volumeSlider.addEventListener('input', (e) => {
-        bgMusic.volume = parseFloat(e.target.value);
-      });
+        volumeSlider.addEventListener('input', (e) => {
+          bgMusic.volume = e.target.value;
+        });
+    } else {
+        console.warn("Аудио файл не найден");
     }
   </script>
 </body>
