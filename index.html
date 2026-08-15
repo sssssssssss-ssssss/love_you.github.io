@@ -30,29 +30,26 @@
       padding-bottom: env(safe-area-inset-bottom);
     }
 
-    /* Контейнер для сердец - теперь он прозрачный и не мешает кликам */
     .heart-container {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none; /* Сквозь него можно нажимать кнопки */
+      pointer-events: none;
       z-index: 1;
       overflow: hidden;
     }
 
     .heart {
       position: absolute;
-      /* Делаем их чуть меньше для мобилок, чтобы не перекрывали текст */
-      width: 24px; 
-      height: 24px;
+      width: 20px; /* Чуть меньше, чтобы много влезло на экран */
+      height: 20px;
       background-color: var(--heart-color);
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-      opacity: 0; /* Скрыты по умолчанию */
-      transform: scale(0); /* И сжаты в точку */
-      will-change: transform, opacity;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+      opacity: 0;
+      transform: scale(0);
+      will-change: transform, opacity, left;
       pointer-events: none;
     }
 
-    /* Магия формы сердца через псевдоэлементы */
     .heart::before, .heart::after {
       content: "";
       background-color: inherit;
@@ -65,32 +62,28 @@
     .heart::before { top: -50%; left: 0; }
     .heart::after { top: 0; right: -50%; }
 
-    /* НОВАЯ АНИМАЦИЯ: Всплеск и падение */
+    /* Анимация: резкий старт, плавное падение */
     @keyframes float-path {
       0% { 
         opacity: 0; 
         transform: translate(0, 20px) scale(0) rotate(0deg); 
-        animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Пружинистый старт */
+        animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
       15% { 
         opacity: 1; 
-        /* Резко вылетают вверх и разлетаются в стороны */
-        transform: translate(-20px, -100px) scale(1.1) rotate(-15deg); 
+        transform: translate(-15px, -80px) scale(1.2) rotate(-10deg); 
         animation-timing-function: ease-in; 
       }
       60% { 
-        /* Парят в верхней точке */
-        transform: translate(30px, -50px) scale(1) rotate(15deg);
+        transform: translate(20px, -40px) scale(1) rotate(10deg);
         animation-timing-function: ease-out;
       }
       100% { 
-        /* Плавно падают вниз и исчезают */
         opacity: 0; 
-        transform: translate(100px, 150vh) scale(0.5) rotate(45deg); 
+        transform: translate(80px, 150vh) scale(0.5) rotate(40deg); 
       }
     }
 
-    /* --- ТЕКСТ --- */
     .container {
       text-align: center;
       position: relative;
@@ -124,14 +117,12 @@
     @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeIn { to { opacity: 1; } }
 
-    /* --- УПРАВЛЕНИЕ --- */
     .controls-wrapper {
       position: fixed;
       bottom: constant(safe-area-inset-bottom);
       bottom: env(safe-area-inset-bottom);
       left: 0; width: 100%;
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       z-index: 100;
       padding: 0 20px;
       pointer-events: none;
@@ -180,28 +171,24 @@
       h1 { font-size: 2.2rem; }
       .control-btn { width: 55px; height: 55px; font-size: 20px; }
       input[type=range] { width: 100px; }
-      .heart { width: 18px; height: 18px; } 
+      .heart { width: 16px; height: 16px; } 
     }
   </style>
 </head>
 <body>
 
-  <!-- Контейнер сердец -->
   <div class="heart-container" id="heartsArea"></div>
 
-  <!-- Текст -->
   <div class="container">
     <h1>Я люблю тебя</h1>
     <p class="subtitle">Ты — самое дорогое, что у меня есть</p>
   </div>
 
-  <!-- Аудио -->
   <audio id="bgMusic" loop>
     <source src="ksb_song.mp3" type="audio/mpeg">
     Ваш браузер не поддерживает аудио.
   </audio>
 
-  <!-- Кнопки -->
   <div class="controls-wrapper">
     <button id="playBtn" class="control-btn" title="Включить музыку">▶</button>
     <div class="volume-container">
@@ -217,50 +204,59 @@
     const volumeSlider = document.getElementById('volumeSlider');
     
     let isPlaying = false;
-    let heartInterval = null; // Таймер, который запускает появление сердец
+    const totalHearts = 70; // МНОГО сердец
+    const hearts = [];
 
-    // --- ГЕНЕРАТОР СЕРДЕЧЕК ---
-    function createHeart() {
-      if (!isPlaying) return; // Если музыка выключена - ничего не делаем
-
+    // 1. Создаем все сердца сразу при загрузке (не ждём музыку)
+    for (let i = 0; i < totalHearts; i++) {
       const heart = document.createElement('div');
       heart.classList.add('heart');
-      
-      // Случайная стартовая позиция по горизонтали
+      heartsArea.appendChild(heart);
+      hearts.push(heart);
+    }
+
+    // Функция, которая запускает полёт для конкретного сердца
+    function animateHeart(heart) {
+      // Если музыка выключена, сердце просто замирает (или можно убрать совсем)
+      if (!isPlaying) {
+        heart.style.opacity = '0';
+        heart.style.transform = 'scale(0)';
+        return;
+      }
+
+      // Случайная позиция старта
       const randomX = Math.random() * 100;
       heart.style.left = randomX + '%';
       
-      // Добавляем класс с анимацией
-      heart.style.animation = 'float-path 4s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite';
+      // Случайная длительность анимации (чтобы они не летели синхронно)
+      const duration = Math.random() * 2 + 3; // от 3 до 5 секунд
+      heart.style.animationDuration = duration + 's';
       
-      // Случайная задержка старта анимации, чтобы они не летели стеной
-      const delay = Math.random() * 2; 
+      // Случайная задержка старта
+      const delay = Math.random() * duration;
       heart.style.animationDelay = delay + 's';
       
-      heartsArea.appendChild(heart);
-
-      // Удаляем сердце после окончания одного цикла анимации (4 секунды), чтобы не засорять память
-      setTimeout(() => {
-        heart.remove();
-      }, 4000);
+      heart.style.opacity = ''; // Сбрасываем в дефолт (видимое)
+      heart.style.transform = '';
     }
 
-    // Функция запуска дождя из сердец
+    // Запускаем бесконечный цикл анимации для всех сердец
     function startHeartRain() {
-      createHeart(); // Создаем первое сразу
-      // Потом создаем новые каждые 300-600 мс
-      heartInterval = setInterval(createHeart, Math.random() * 300 + 300); 
+      hearts.forEach(heart => {
+        animateHeart(heart);
+      });
+      // Перезапускаем каждые 4 секунды, чтобы сердца летали бесконечно
+      setTimeout(startHeartRain, 4000);
     }
 
-    // Функция остановки дождя
     function stopHeartRain() {
-      clearInterval(heartInterval);
-      heartInterval = null;
-      // Можно оставить те, что уже в полете, или убрать все
-      // heartsArea.innerHTML = ''; 
+      // Просто выключаем видимость, пока не нажмут Play снова
+      hearts.forEach(heart => {
+        heart.style.opacity = '0';
+        heart.style.transform = 'scale(0)';
+      });
     }
 
-    // --- ЛОГИКА КНОПКИ И ГРОМКОСТИ ---
     if (bgMusic) {
         bgMusic.volume = volumeSlider.value;
         
@@ -272,9 +268,7 @@
                 isPlaying = true;
                 playBtn.textContent = '⏸';
                 playBtn.classList.remove('paused');
-                
-                // ЗАПУСКАЕМ СЕРДЕЧКИ
-                startHeartRain();
+                startHeartRain(); // ЗАПУСКАЕМ ДОЖДЬ
               }).catch(error => {
                 console.log('Автовоспроизведение заблокировано.', error);
               });
@@ -284,9 +278,7 @@
             isPlaying = false;
             playBtn.textContent = '▶';
             playBtn.classList.add('paused');
-            
-            // ОСТАНАВЛИВАЕМ СЕРДЕЧКИ (новые не появляются)
-            stopHeartRain();
+            stopHeartRain(); // ОСТАНАВЛИВАЕМ ДОЖДЬ
           }
         });
 
