@@ -7,7 +7,7 @@
   <style>
     :root {
       --pink-1: #FFB6C1;
-      --pink-2: #FF69B4;
+      --pink-2: #FF69B4;       /* Яркий розовый */
       --text-color: #E94560;
       --text-light: #FF8E9B;
       --white: #ffffff;
@@ -29,7 +29,74 @@
       font-family: 'Arial', sans-serif;
       overflow: hidden;
       position: relative;
+      margin: 0;
     }
+
+    /* --- СЕРДЕЧКИ (НАДЕЖНЫЙ ВАРИАНТ ЧЕРЕЗ КРУГИ) --- */
+    .heart-wrapper {
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 40px;
+      animation: fall 10s infinite linear;
+      z-index: 5;
+      pointer-events: none; /* Чтобы не мешали кликам */
+    }
+    
+    /* Разные задержки для каждого сердечка, чтобы летели не кучей */
+    .heart-wrapper:nth-child(1) { animation-delay: 0s; }
+    .heart-wrapper:nth-child(2) { animation-delay: 2s; }
+    .heart-wrapper:nth-child(3) { animation-delay: 4s; }
+    .heart-wrapper:nth-child(4) { animation-delay: 6s; }
+    .heart-wrapper:nth-child(5) { animation-delay: 8s; }
+
+    .heart {
+      background-color: var(--pink-2);
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform: rotate(-45deg);
+      box-shadow: 0 10px 15px rgba(0,0,0,0.2); /* Тень, чтобы выделялось */
+      border: 2px solid rgba(255,255,255,0.3); /* Лёгкая белая обводка */
+    }
+
+    /* Рисуем половинки сердца через псевдоэлементы (круги) */
+    .heart::before,
+    .heart::after {
+      content: "";
+      background-color: var(--pink-2);
+      border-radius: 50%;
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+    /* Левый круг */
+    .heart::before { 
+      top: -50%; 
+      left: 0; 
+    } 
+    /* Правый круг */
+    .heart::after { 
+      top: 0; 
+      right: -50%; 
+    }
+
+    @keyframes fall {
+      0% { 
+        transform: translateX(-50%) translateY(-100px) rotate(0deg); 
+        opacity: 0; 
+      }
+      10% { opacity: 1; }
+      100% { 
+        /* Летит далеко вниз и немного вправо, чтобы пересечь весь экран */
+        transform: translateX(calc(-50% + 300px)) translateY(150vh) rotate(720deg); 
+        opacity: 0.5; 
+      }
+    }
+    /* ------------------------------------------------------------- */
 
     .container {
       text-align: center;
@@ -68,44 +135,7 @@
       to { opacity: 1; } 
     }
 
-    /* --- СЕРДЕЧКИ: теперь на чистом CSS (гарантированно работают) --- */
-    .heart {
-      position: absolute;
-      top: -50px;
-      /* Размер сердечка */
-      width: 30px;
-      height: 30px;
-      
-      /* Цвет */
-      background-color: var(--pink-2);
-      
-      /* Рисуем сердечко через CSS (два круга + квадрат) */
-      clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 50% 70%, 20% 100%, 0% 35%);
-      
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-      animation: float 6s infinite ease-in-out;
-      will-change: transform;
-      z-index: 5;
-    }
-
-    /* Разные задержки для эффекта «дождя» */
-    .heart:nth-child(2) { animation-delay: 1s; }
-    .heart:nth-child(3) { animation-delay: 2s; }
-    .heart:nth-child(4) { animation-delay: 3s; }
-    .heart:nth-child(5) { animation-delay: 4s; }
-
-    @keyframes float {
-      0%, 100% { 
-        transform: translate(0, -50px) rotate(0deg); 
-      }
-      50% { 
-        /* Чуть смещаем вбок и поднимаем выше для плавного изгиба */
-        transform: translate(20px, -100px) rotate(-15deg); 
-      }
-    }
-    /* ------------------------------------------------------------- */
-
-    /* Блок управления (кнопка + громкость) — внизу по центру */
+    /* Блок управления (кнопка + громкость) */
     .controls-wrapper {
       position: fixed;
       bottom: 40px;
@@ -166,32 +196,33 @@
       h1 { font-size: 2.5rem; }
       .control-btn { width: 60px; height: 60px; font-size: 20px; }
       input[type=range] { width: 100px; }
-      .heart { width: 20px; height: 20px; }
+      .heart-wrapper { width: 30px; height: 30px; } 
+      .heart { border-width: 1px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Декоративные сердечки (5 штук) -->
-  <div class="heart"></div>
-  <div class="heart"></div>
-  <div class="heart"></div>
-  <div class="heart"></div>
-  <div class="heart"></div>
+  <!-- СЕРДЕЧКИ: 5 штук, теперь они точно будут -->
+  <div class="heart-wrapper"><div class="heart"></div></div>
+  <div class="heart-wrapper"><div class="heart"></div></div>
+  <div class="heart-wrapper"><div class="heart"></div></div>
+  <div class="heart-wrapper"><div class="heart"></div></div>
+  <div class="heart-wrapper"><div class="heart"></div></div>
 
-  <!-- Основной текст (строго в центре) -->
+  <!-- Основной текст -->
   <div class="container">
     <h1>Я люблю тебя</h1>
     <p class="subtitle">Ты — самое дорогое, что у меня есть</p>
   </div>
 
-  <!-- Аудиофайл -->
+  <!-- Аудиофайл (оставлен как у тебя) -->
   <audio id="bgMusic" loop>
     <source src="ksb_song.mp3" type="audio/mpeg">
     Ваш браузер не поддерживает аудио.
   </audio>
 
-  <!-- Блок управления (внизу по центру) -->
+  <!-- Блок управления -->
   <div class="controls-wrapper">
     <button id="playBtn" class="control-btn" title="Включить/Выключить музыку">▶</button>
     <div class="volume-container">
@@ -206,32 +237,37 @@
     const volumeSlider = document.getElementById('volumeSlider');
     let isPlaying = false;
 
-    playBtn.addEventListener('click', () => {
-      if (!isPlaying) {
-        const playPromise = bgMusic.play();
-        
-        if (playPromise !== undefined) {
-          playPromise
-            .then(_ => {
-              isPlaying = true;
-              playBtn.textContent = '⏸';
-              playBtn.classList.remove('paused');
-            })
-            .catch(error => {
-              console.log('Автовоспроизведение заблокировано браузером.', error);
-            });
-        }
-      } else {
-        bgMusic.pause();
-        isPlaying = false;
-        playBtn.textContent = '▶';
-        playBtn.classList.add('paused');
-      }
-    });
+    // Защита: если аудио тега нет (например, удалили файл), скрипт не сломается
+    if (bgMusic) {
+        playBtn.addEventListener('click', () => {
+          if (!isPlaying) {
+            const playPromise = bgMusic.play();
+            
+            if (playPromise !== undefined) {
+              playPromise
+                .then(_ => {
+                  isPlaying = true;
+                  playBtn.textContent = '⏸';
+                  playBtn.classList.remove('paused');
+                })
+                .catch(error => {
+                  console.log('Автовоспроизведение заблокировано браузером.', error);
+                });
+            }
+          } else {
+            bgMusic.pause();
+            isPlaying = false;
+            playBtn.textContent = '▶';
+            playBtn.classList.add('paused');
+          }
+        });
 
-    volumeSlider.addEventListener('input', (e) => {
-      bgMusic.volume = e.target.value;
-    });
+        volumeSlider.addEventListener('input', (e) => {
+          bgMusic.volume = e.target.value;
+        });
+    } else {
+        console.warn("Тег audio не найден на странице");
+    }
   </script>
 </body>
 </html>
