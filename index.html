@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <!-- Самое важное для мобильных: запрещает зум и фиксирует масштаб -->
+  <!-- Важно: запрещаем зум, чтобы верстка не ломалась -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Я люблю тебя</title>
   <style>
@@ -12,30 +12,25 @@
       --heart-color: #FF247C; 
       --btn-gradient-start: #E94560;
       --btn-gradient-end: #C7183B;
-      --btn-border: rgba(255, 255, 255, 0.8);
       --text-color: #E94560;
       --text-light: #FF8E9B;
     }
 
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; /* Критически важно: padding не увеличивает ширину элемента */
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      min-height: 100dvh; /* Динамическая высота (учитывает Dynamic Island) */
+      min-height: 100dvh; 
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      overflow-x: hidden; /* ЗАПРЕЩАЕТ ГОРИЗОНТАЛЬНУЮ ПРОКРУТКУ (самое важное!) */
+      overflow-x: hidden; /* Запрет горизонтальной прокрутки */
       position: relative;
       margin: 0;
       padding-bottom: constant(safe-area-inset-bottom); 
-      padding-bottom: env(safe-area-inset-bottom); /* Отступ под кнопку "Домой" */
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
     /* --- СЕРДЕЧКИ --- */
@@ -47,7 +42,7 @@
       height: 100%;
       pointer-events: none;
       z-index: 1;
-      overflow: hidden; /* Если вдруг сердечки улетят, они обрежутся, а не растянут экран */
+      overflow: hidden;
     }
 
     .heart {
@@ -104,7 +99,6 @@
       animation: fadeInUp 1s ease forwards 0.5s;
       text-transform: uppercase;
       letter-spacing: 3px;
-      /* Гарантируем, что текст не вылезет за экран */
       word-wrap: break-word; 
       max-width: 100%;
     }
@@ -121,7 +115,7 @@
     @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeIn { to { opacity: 1; } }
 
-    /* --- БЛОК УПРАВЛЕНИЯ (ФИКСАЦИЯ) --- */
+    /* --- БЛОК УПРАВЛЕНИЯ --- */
     .controls-wrapper {
       position: fixed;
       bottom: constant(safe-area-inset-bottom);
@@ -129,19 +123,19 @@
       left: 0;
       width: 100%;
       display: flex;
-      justify-content: center; /* Центрирует кнопку по горизонтали */
+      justify-content: center;
       align-items: center;
       flex-direction: column;
       z-index: 100;
       padding: 0 20px;
-      pointer-events: none; 
+      pointer-events: none; /* Пропускаем клики сквозь обертку */
     }
 
     .control-btn {
       width: 65px;
       height: 65px;
       border-radius: 50%;
-      border: 2px solid var(--btn-border);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       background: rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -154,21 +148,12 @@
       justify-content: center;
       transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
       pointer-events: auto;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      /* Убираем любые трансформации, которые могли сдвигать кнопку */
       transform: none !important; 
-      margin: 0 auto; /* Дополнительная страховка для центрирования */
+      margin: 0 auto;
     }
 
-    .control-btn:active {
-      transform: scale(0.95);
-    }
-
-    .control-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 30px rgba(233, 69, 96, 0.6);
-      border-color: white;
-    }
+    .control-btn:active { transform: scale(0.95); }
+    .control-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px rgba(233, 69, 96, 0.6); border-color: white; }
     
     .control-btn.paused { 
       background-color: rgba(200, 200, 200, 0.2);
@@ -178,6 +163,7 @@
       transform: none;
     }
     
+    /* --- ИСПРАВЛЕННЫЙ ПОЛЗУНОК --- */
     .volume-container {
       display: flex;
       flex-direction: column;
@@ -190,7 +176,8 @@
       padding: 10px;
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      max-width: 100%; /* Чтобы ползунок не вылезал на очень узких экранах */
+      max-width: 100%;
+      pointer-events: auto; /* Разрешаем клики внутри контейнера */
     }
 
     .volume-label {
@@ -201,6 +188,7 @@
       letter-spacing: 1px;
     }
 
+    /* ГЛАВНОЕ ИСПРАВЛЕНИЕ: touch-action: manipulation */
     input[type=range] {
       cursor: pointer;
       accent-color: var(--heart-color);
@@ -209,7 +197,8 @@
       background: rgba(255, 255, 255, 0.2);
       border-radius: 10px;
       height: 6px;
-      max-width: 100%; /* ГЛАВНОЕ: ползунок никогда не будет шире экрана */
+      max-width: 100%;
+      touch-action: manipulation; /* <--- ЭТО ЗАСТАВЛЯЕТ ЕГО РАБОТАТЬ НА IPHONE */
     }
 
     input[type=range]::-webkit-slider-thumb {
@@ -221,9 +210,9 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       cursor: pointer;
       margin-top: -7px;
+      touch-action: manipulation; /* Дублируем для надежности */
     }
 
-    /* Адаптив для очень маленьких экранов (меньше 360px) */
     @media (max-width: 360px) {
       h1 { font-size: 2.2rem; }
       .control-btn { width: 55px; height: 55px; font-size: 20px; }
@@ -234,26 +223,24 @@
 </head>
 <body>
 
-  <!-- Контейнер для сердечек -->
   <div class="heart-container" id="heartsArea"></div>
 
-  <!-- Основной текст -->
   <div class="container">
     <h1>Я люблю тебя</h1>
     <p class="subtitle">Ты — самое дорогое, что у меня есть</p>
   </div>
 
-  <!-- Аудиофайл -->
   <audio id="bgMusic" loop>
     <source src="ksb_song.mp3" type="audio/mpeg">
     Ваш браузер не поддерживает аудио.
   </audio>
 
-  <!-- Блок управления -->
   <div class="controls-wrapper">
     <button id="playBtn" class="control-btn" title="Включить/Выключить музыку">▶</button>
+    
     <div class="volume-container">
       <span class="volume-label">Громкость</span>
+      <!-- Добавлен класс для отладки, если нужно -->
       <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.3">
     </div>
   </div>
@@ -276,13 +263,19 @@
       heartsArea.appendChild(heart);
     }
 
-    // --- МУЗЫКА И КНОПКИ ---
+    // --- МУЗЫКА И КНОПКИ (ИСПРАВЛЕННАЯ ЛОГИКА) ---
     const playBtn = document.getElementById('playBtn');
     const bgMusic = document.getElementById('bgMusic');
     const volumeSlider = document.getElementById('volumeSlider');
     let isPlaying = false;
 
+    // 1. Инициализация громкости при загрузке
     if (bgMusic) {
+        bgMusic.volume = volumeSlider.value;
+    }
+
+    // 2. Логика кнопки Play/Pause
+    if (playBtn) {
         playBtn.addEventListener('click', () => {
           if (!isPlaying) {
             const playPromise = bgMusic.play();
@@ -296,6 +289,7 @@
                 })
                 .catch(error => {
                   console.log('Автовоспроизведение заблокировано браузером.', error);
+                  // Если браузер заблокировал автоплей, можно предложить нажать кнопку еще раз или показать алерт
                 });
             }
           } else {
@@ -305,12 +299,25 @@
             playBtn.classList.add('paused');
           }
         });
+    }
 
+    // 3. ГЛАВНОЕ ИСПРАВЛЕНИЕ: Ползунок громкости
+    if (volumeSlider && bgMusic) {
+        // Событие 'input' срабатывает при каждом движении пальца (важно для мобильных)
         volumeSlider.addEventListener('input', (e) => {
-          bgMusic.volume = e.target.value;
+          const currentVolume = parseFloat(e.target.value);
+          bgMusic.volume = currentVolume;
+          console.log("Громкость установлена:", currentVolume);
+        });
+
+        // Событие 'change' срабатывает, когда пользователь отпустил палец (страховка)
+        volumeSlider.addEventListener('change', (e) => {
+          const currentVolume = parseFloat(e.target.value);
+          bgMusic.volume = currentVolume;
         });
     } else {
-        console.warn("Аудио файл не найден");
+        if (!volumeSlider) console.error("Не найден ползунок громкости (id=volumeSlider)");
+        if (!bgMusic) console.error("Не найден аудио элемент (id=bgMusic)");
     }
   </script>
 </body>
